@@ -1,0 +1,53 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  SISWA
+}
+
+model User {
+  id           String    @id @default(cuid())
+  name         String
+  email        String    @unique
+  passwordHash String
+  role         Role      @default(SISWA)
+  attempts     Attempt[]
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+}
+
+model Mufrodat {
+  id          String   @id @default(cuid())
+  arabic      String
+  latin       String
+  meaning     String
+  category    String
+  audioUrl    String?
+  imageUrl    String?
+  letters     String
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  attempts    Attempt[]
+}
+
+model Attempt {
+  id           String   @id @default(cuid())
+  userId       String
+  mufrodatId   String
+  isCorrect    Boolean
+  answer       String
+  score        Int      @default(0)
+  createdAt    DateTime @default(now())
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  mufrodat     Mufrodat @relation(fields: [mufrodatId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+}
